@@ -39,14 +39,31 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         private val methodChannels = mutableMapOf<BinaryMessenger, MethodChannel>()
         private val eventChannels = mutableMapOf<BinaryMessenger, EventChannel>()
         private val eventHandlers = mutableListOf<WeakReference<EventCallbackHandler>>()
+        private val callEventListeners = mutableListOf<CallEventListener>()
+
+        fun registerCallEventListener(listener: CallEventListener) {
+            callEventListeners.add(listener)
+        }
+
+        fun unregisterCallEventListener(listener: CallEventListener) {
+            callEventListeners.remove(listener)
+        }
 
         fun sendEvent(event: String, body: Map<String, Any>) {
+            // Notify the registered external listeners
+            callEventListeners.forEach {
+                it.onEvent(event, body)
+            }
             eventHandlers.reapCollection().forEach {
                 it.get()?.send(event, body)
             }
         }
 
         public fun sendEventCustom(event: String, body: Map<String, Any>) {
+            // Notify the registered external listeners
+            callEventListeners.forEach {
+                it.onEvent(event, body)
+            }
             eventHandlers.reapCollection().forEach {
                 it.get()?.send(event, body)
             }
@@ -318,6 +335,11 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
     override fun onDetachedFromActivity() {
 
+    }
+
+    // The external call event listener
+    interface CallEventListener {
+        fun onEvent(event: String, body: Map<String, Any>)
     }
 
     class EventCallbackHandler : EventChannel.StreamHandler {
