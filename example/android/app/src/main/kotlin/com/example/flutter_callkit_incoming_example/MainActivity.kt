@@ -20,7 +20,7 @@ class MainActivity : FlutterActivity(), FlutterCallkitIncomingPlugin.CallEventLi
         FlutterCallkitIncomingPlugin.unregisterCallEventListener(this)
     }
 
-    override fun onEvent(event: String, body: Map<String, Any>) {
+    override fun onCallEvent(event: String, body: Map<String, Any>) {
         Log.i(TAG, "Event: $event received with data: $body")
     }
 }

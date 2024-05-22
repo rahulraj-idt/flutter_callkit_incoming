@@ -4,10 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.NonNull
 import com.hiennv.flutter_callkit_incoming.Utils.Companion.reapCollection
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -52,7 +50,7 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         fun sendEvent(event: String, body: Map<String, Any>) {
             // Notify the registered external listeners
             callEventListeners.forEach {
-                it.onEvent(event, body)
+                it.onCallEvent(event, body)
             }
             eventHandlers.reapCollection().forEach {
                 it.get()?.send(event, body)
@@ -62,7 +60,7 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         public fun sendEventCustom(event: String, body: Map<String, Any>) {
             // Notify the registered external listeners
             callEventListeners.forEach {
-                it.onEvent(event, body)
+                it.onCallEvent(event, body)
             }
             eventHandlers.reapCollection().forEach {
                 it.get()?.send(event, body)
@@ -339,7 +337,7 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
     // The external call event listener
     interface CallEventListener {
-        fun onEvent(event: String, body: Map<String, Any>)
+        fun onCallEvent(event: String, body: Map<String, Any>)
     }
 
     class EventCallbackHandler : EventChannel.StreamHandler {
