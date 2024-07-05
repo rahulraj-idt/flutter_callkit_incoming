@@ -57,6 +57,7 @@ Future<void> showCallkitIncoming(String uuid) async {
       supportsHolding: true,
       supportsGrouping: false,
       supportsUngrouping: false,
+      includesCallsInRecents: true,
       ringtonePath: 'system_ringtone_default',
     ),
   );

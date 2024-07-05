@@ -175,6 +175,7 @@ class HomePageState extends State<HomePage> {
           supportsHolding: true,
           supportsGrouping: false,
           supportsUngrouping: false,
+          includesCallsInRecents: true,
           ringtonePath: 'system_ringtone_default',
         ),
       );
