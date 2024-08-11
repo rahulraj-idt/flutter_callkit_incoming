@@ -173,7 +173,11 @@ class CallkitIncomingActivity : Activity() {
             }
         }
 
-		val textColor = data?.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_COLOR, "#ffffff")
+        // Handle if a custom activity is specified
+        if (handleCustomCallActivity(data, intent)) return
+
+
+        val textColor = data?.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_COLOR, "#ffffff")
         val isShowCallID = data?.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
         tvNameCaller.text = data?.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
         tvNumber.text = data?.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
@@ -236,6 +240,24 @@ class CallkitIncomingActivity : Activity() {
                     .error(R.drawable.transparent)
                     .into(ivBackground)
         }
+    }
+
+    private fun handleCustomCallActivity(data: Bundle?, intent: Intent): Boolean {
+        val customActivityName = data?.getString(CallkitConstants.EXTRA_CALLKIT_CUSTOM_INCOMING_ACTIVITY)
+        if (!customActivityName.isNullOrEmpty()) {
+            try {
+                val customActivityClass = Class.forName(customActivityName)
+                val customIntent = Intent(this, customActivityClass)
+                customIntent.putExtras(intent)
+                startActivity(customIntent)
+                finish()
+                return true
+            } catch (e: ClassNotFoundException) {
+                // Log or handle the error if the custom activity class isn't found
+                Log.e("CallkitIncoming", "Custom activity not found: $customActivityName", e)
+            }
+        }
+        return false
     }
 
     private fun finishTimeout(data: Bundle?, duration: Long) {
