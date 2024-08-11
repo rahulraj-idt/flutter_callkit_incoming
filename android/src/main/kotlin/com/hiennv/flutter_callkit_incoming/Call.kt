@@ -84,8 +84,8 @@ data class Data(val args: Map<String, Any?>) {
 
     @JsonProperty("isShowFullLockedScreen")
     var isShowFullLockedScreen: Boolean = true
-    @JsonProperty("isCustomIncomingActivity")
-    var isCustomIncomingActivity: Boolean = false
+    @JsonProperty("customIncomingActivityName")
+    var customIncomingActivityName: String? = null
 
     init {
         var android: Map<String, Any?>? = args["android"] as? HashMap<String, Any?>?
@@ -103,7 +103,7 @@ data class Data(val args: Map<String, Any?>) {
             android["incomingCallNotificationChannelName"] as? String
         missedCallNotificationChannelName = android["missedCallNotificationChannelName"] as? String
         isShowFullLockedScreen = android["isShowFullLockedScreen"] as? Boolean ?: true
-        isCustomIncomingActivity = android["isCustomIncomingActivity"] as? Boolean ?: false
+        customIncomingActivityName = android["isCustomIncomingActivity"] as? String
 
         val missedNotification: Map<String, Any?>? =
             args["missedCallNotification"] as? Map<String, Any?>?
@@ -217,9 +217,9 @@ data class Data(val args: Map<String, Any?>) {
             CallkitConstants.EXTRA_CALLKIT_IS_SHOW_FULL_LOCKED_SCREEN,
             isShowFullLockedScreen
         )
-        bundle.putBoolean(
+        bundle.putString(
             CallkitConstants.EXTRA_CALLKIT_CUSTOM_INCOMING_ACTIVITY,
-            isCustomIncomingActivity
+            customIncomingActivityName
         )
         return bundle
     }
@@ -310,9 +310,9 @@ data class Data(val args: Map<String, Any?>) {
                 CallkitConstants.EXTRA_CALLKIT_IS_SHOW_FULL_LOCKED_SCREEN,
                 true
             )
-            data.isCustomIncomingActivity = bundle.getBoolean(
+            data.customIncomingActivityName = bundle.getString(
                 CallkitConstants.EXTRA_CALLKIT_CUSTOM_INCOMING_ACTIVITY,
-                false
+                null
             )
             return data
         }
