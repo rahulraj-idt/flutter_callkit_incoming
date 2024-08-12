@@ -103,7 +103,7 @@ data class Data(val args: Map<String, Any?>) {
             android["incomingCallNotificationChannelName"] as? String
         missedCallNotificationChannelName = android["missedCallNotificationChannelName"] as? String
         isShowFullLockedScreen = android["isShowFullLockedScreen"] as? Boolean ?: true
-        customIncomingActivityName = android["isCustomIncomingActivity"] as? String
+        customIncomingActivityName = android["customIncomingActivityName"] as? String
 
         val missedNotification: Map<String, Any?>? =
             args["missedCallNotification"] as? Map<String, Any?>?
