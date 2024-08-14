@@ -253,6 +253,18 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     result.success("OK")
                 }
 
+                "acceptCall" -> {
+                    val data = Data(call.arguments() ?: HashMap())
+                    context?.sendBroadcast(
+                        CallkitIncomingBroadcastReceiver.getIntentAccept(
+                            requireNotNull(context),
+                            data.toBundle()
+                        )
+                    )
+
+                    result.success("OK")
+                }
+
                 "callConnected" -> {
                     result.success("OK")
                 }

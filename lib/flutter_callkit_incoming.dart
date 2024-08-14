@@ -97,6 +97,12 @@ class FlutterCallkitIncoming {
     await _channel.invokeMethod("declineCall", {'id': id});
   }
 
+  /// Accept an Incoming call.
+  /// Only Android
+  static Future acceptCall(String id) async {
+    await _channel.invokeMethod("acceptCall", {'id': id});
+  }
+
   /// Set call has been connected successfully.
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
