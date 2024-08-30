@@ -680,6 +680,28 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_HOLD, [ "id": id, "isOnHold": isOnHold ])
     }
     
+    public func invalidate() {
+        sharedProvider?.setDelegate(nil, queue: nil)
+        sharedProvider?.invalidate()
+        sharedProvider = nil
+
+        callManager.endCallAlls()
+
+        outgoingCall = nil
+        answerCall = nil
+        data = nil
+        isFromPushKit = false
+        silenceEvents = false
+
+        streamHandlers = WeakArray([])
+
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Failed to deactivate audio session: \(error)")
+        }
+    }
+    
 }
 
 class EventCallbackHandler: NSObject, FlutterStreamHandler {
