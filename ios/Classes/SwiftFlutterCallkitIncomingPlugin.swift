@@ -693,8 +693,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         isFromPushKit = false
         silenceEvents = false
 
-        streamHandlers = WeakArray([])
-
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
