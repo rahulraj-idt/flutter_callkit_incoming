@@ -700,6 +700,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
 
+    public func hasConnectedCall() -> Bool {
+       return callManager.calls.contains {!$0.hasEnded }
+    }
+
 }
 
 class EventCallbackHandler: NSObject, FlutterStreamHandler {
