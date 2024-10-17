@@ -120,7 +120,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 return
             }
             if(self.isFromPushKit){
-                self.endCall(self.data!)
+                if let args = args as? [String: Any],
+                    let id = args["id"] as? String, id == self.data!.uuid {
+                    self.endCall(self.data!)
+                 }
             }else{
                 if let getArgs = args as? [String: Any] {
                     self.data = Data(args: getArgs)
