@@ -212,6 +212,17 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         case "setAudioRoute":
             result("OK")
             break
+        case "updateCallkitIncoming":
+            guard let args = call.arguments else {
+                result("OK")
+                return
+            }
+            if let getArgs = args as? [String: Any] {
+                self.data = Data(args: getArgs)
+                updateCallkitIncoming(self.data!, fromPushKit: false)
+            }
+            result("OK")
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -267,6 +278,32 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 self.endCallNotExist(data)
             }
         }
+    }
+    
+    @objc public func updateCallkitIncoming(_ data: Data, fromPushKit: Bool) {
+        self.isFromPushKit = fromPushKit
+        if(fromPushKit){
+            self.data = data
+        }
+        
+        var handle: CXHandle?
+        handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
+        
+        let callUpdate = CXCallUpdate()
+        callUpdate.remoteHandle = handle
+        callUpdate.supportsDTMF = data.supportsDTMF
+        callUpdate.supportsHolding = data.supportsHolding
+        callUpdate.supportsGrouping = data.supportsGrouping
+        callUpdate.supportsUngrouping = data.supportsUngrouping
+        callUpdate.hasVideo = data.type > 0 ? true : false
+        callUpdate.localizedCallerName = data.nameCaller
+        
+        initCallkitProvider(data)
+        
+        let uuid = UUID(uuidString: data.uuid)
+        
+        configurAudioSession()
+        self.sharedProvider?.reportCall(with: uuid!, updated: callUpdate)
     }
     
     @objc public func startCall(_ data: Data, fromPushKit: Bool) {
