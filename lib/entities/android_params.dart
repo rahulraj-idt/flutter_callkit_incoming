@@ -18,6 +18,7 @@ class AndroidParams {
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
     this.isShowFullLockedScreen,
+    this.customIncomingActivityName,
   });
 
   /// Using custom notifications.
@@ -55,6 +56,9 @@ class AndroidParams {
 
   /// Show full locked screen.
   final bool? isShowFullLockedScreen;
+
+  /// The custom incoming call screen name
+  final String? customIncomingActivityName;
 
   factory AndroidParams.fromJson(Map<String, dynamic> json) =>
       _$AndroidParamsFromJson(json);
