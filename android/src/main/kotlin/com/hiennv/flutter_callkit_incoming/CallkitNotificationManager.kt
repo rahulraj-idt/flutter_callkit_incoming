@@ -504,23 +504,6 @@ class CallkitNotificationManager(private val context: Context) {
     }
 
     private fun getActivityPendingIntent(id: Int, data: Bundle): PendingIntent {
-        // Check if custom activity is specified
-        val customActivityName = data.getString(CallkitConstants.EXTRA_CALLKIT_CUSTOM_INCOMING_ACTIVITY)
-        if (!customActivityName.isNullOrEmpty()) {
-            try {
-                // Directly create intent for custom activity instead of CallkitIncomingActivity
-                val customActivityClass = Class.forName(customActivityName)
-                val customIntent = Intent(context, customActivityClass)
-                // Add the data bundle and flags
-                customIntent.putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
-                customIntent.action = "${context.packageName}.${CallkitConstants.ACTION_CALL_INCOMING}"
-                customIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                return PendingIntent.getActivity(context, id, customIntent, getFlagPendingIntent())
-            } catch (e: ClassNotFoundException) {
-                // If class not found, fall back to default
-            }
-        }
-        // Default fallback to CallkitIncomingActivity
         val intent = CallkitIncomingActivity.getIntent(context, data)
         return PendingIntent.getActivity(context, id, intent, getFlagPendingIntent())
     }
