@@ -29,6 +29,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     private var callManager: CallManager
     
     private var sharedProvider: CXProvider? = nil
+    private var isExternalProvider: Bool = false
     
     private var outgoingCall : Call?
     private var answerCall : Call?
@@ -237,6 +238,26 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         return UserDefaults.standard.string(forKey: devicePushTokenVoIP) ?? ""
     }
     
+    /// Set external CXProvider for hosting apps that manage their own CallKit provider
+    /// - Parameter provider: The external CXProvider to use
+    /// - Note: Must be called before any call operations. Once set, the plugin will not create its own provider
+    @objc public func setExternalProvider(_ provider: CXProvider) {
+        if self.sharedProvider != nil && !self.isExternalProvider {
+            // Clean up internal provider if it exists
+            self.sharedProvider?.setDelegate(nil, queue: nil)
+            self.sharedProvider?.invalidate()
+        }
+        self.sharedProvider = provider
+        self.isExternalProvider = true
+        self.callManager.setSharedProvider(provider)
+    }
+    
+    /// Check if an external provider is currently set
+    /// - Returns: true if external provider is set, false if using internal provider
+    @objc public func hasExternalProvider() -> Bool {
+        return self.isExternalProvider
+    }
+    
     @objc public func getAcceptedCall() -> Data? {
         NSLog("Call data ids \(String(describing: data?.uuid)) \(String(describing: answerCall?.uuid.uuidString))")
         if data?.uuid.lowercased() == answerCall?.uuid.uuidString.lowercased() {
@@ -432,10 +453,17 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     func initCallkitProvider(_ data: Data) {
         if(self.sharedProvider == nil){
-            self.sharedProvider = CXProvider(configuration: createConfiguration(data))
-            self.sharedProvider?.setDelegate(self, queue: nil)
+            // Only create internal provider if no external provider is set
+            if !self.isExternalProvider {
+                self.sharedProvider = CXProvider(configuration: createConfiguration(data))
+                self.sharedProvider?.setDelegate(self, queue: nil)
+                self.callManager.setSharedProvider(self.sharedProvider!)
+            }
+        } else if !self.isExternalProvider {
+            // Update internal provider configuration if it exists
+            self.callManager.setSharedProvider(self.sharedProvider!)
         }
-        self.callManager.setSharedProvider(self.sharedProvider!)
+        // Note: For external providers, the delegate and callManager are set in setExternalProvider()
     }
     
     func createConfiguration(_ data: Data) -> CXProviderConfiguration {
@@ -721,9 +749,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     }
     
     public func invalidate() {
-        sharedProvider?.setDelegate(nil, queue: nil)
-        sharedProvider?.invalidate()
+        // Only cleanup internal provider, not external ones
+        if !isExternalProvider {
+            sharedProvider?.setDelegate(nil, queue: nil)
+            sharedProvider?.invalidate()
+        }
         sharedProvider = nil
+        isExternalProvider = false
 
         callManager.endCallAlls()
 
