@@ -240,7 +240,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     /// Set external CXProvider for hosting apps that manage their own CallKit provider
     /// - Parameter provider: The external CXProvider to use
-    /// - Note: Must be called before any call operations. Once set, the plugin will not create its own provider
+    /// - Note: Must be called before any call operations. Use setPluginAsDelegate() to configure callback handling
     @objc public func setExternalProvider(_ provider: CXProvider) {
         if self.sharedProvider != nil && !self.isExternalProvider {
             // Clean up internal provider if it exists
@@ -252,10 +252,28 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         self.callManager.setSharedProvider(provider)
     }
     
+    /// Configure the plugin to handle delegate callbacks for the current provider (internal or external)
+    /// - Note: Call this after setExternalProvider() if you want the plugin to handle CallKit callbacks
+    @objc public func setPluginAsDelegate() {
+        guard let provider = self.sharedProvider else {
+            print("Warning: No provider available. Call setExternalProvider() or show an incoming call first.")
+            return
+        }
+        provider.setDelegate(self, queue: nil)
+    }
+    
     /// Check if an external provider is currently set
     /// - Returns: true if external provider is set, false if using internal provider
     @objc public func hasExternalProvider() -> Bool {
         return self.isExternalProvider
+    }
+    
+    /// Check if the plugin is currently set as the delegate for the provider
+    /// - Returns: true if plugin is the delegate, false otherwise
+    @objc public func isPluginDelegate() -> Bool {
+        // Note: CXProvider doesn't expose its delegate directly, so we can't check programmatically
+        // This method serves as a reminder to hosting apps about delegate management
+        return self.sharedProvider != nil
     }
     
     @objc public func getAcceptedCall() -> Data? {
