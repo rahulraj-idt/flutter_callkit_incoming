@@ -262,6 +262,14 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         provider.setDelegate(self, queue: nil)
     }
     
+    /// Ensures plugin is set as delegate for external providers before call operations
+    /// This prevents other services (like SIP) from overriding the delegate
+    private func ensurePluginDelegateForExternalProvider() {
+        if self.isExternalProvider && self.sharedProvider != nil {
+            self.sharedProvider?.setDelegate(self, queue: nil)
+        }
+    }
+    
     /// Check if an external provider is currently set
     /// - Returns: true if external provider is set, false if using internal provider
     @objc public func hasExternalProvider() -> Bool {
@@ -304,6 +312,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         
         initCallkitProvider(data)
         
+        // Safety: Ensure plugin is delegate for external providers before call operations
+        ensurePluginDelegateForExternalProvider()
+        
         let uuid = UUID(uuidString: data.uuid)
         
         configurAudioSession()
@@ -339,6 +350,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         
         initCallkitProvider(data)
         
+        // Safety: Ensure plugin is delegate for external providers before call operations
+        ensurePluginDelegateForExternalProvider()
+        
         let uuid = UUID(uuidString: data.uuid)
         
         configurAudioSession()
@@ -351,6 +365,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             self.data = data
         }
         initCallkitProvider(data)
+        
+        // Safety: Ensure plugin is delegate for external providers before call operations
+        ensurePluginDelegateForExternalProvider()
+        
         self.callManager.startCall(data)
     }
     
