@@ -40,6 +40,11 @@ class CallkitSoundPlayerService : Service() {
         vibrator = null
     }
 
+    override fun onTimeout(startId: Int) {
+        stopSelf(startId)
+        super.onTimeout(startId)
+    }
+
     private fun prepare() {
         mediaPlayer?.stop()
         mediaPlayer?.release()
