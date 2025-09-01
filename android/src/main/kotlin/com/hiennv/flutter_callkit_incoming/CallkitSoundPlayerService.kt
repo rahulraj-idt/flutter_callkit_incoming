@@ -86,17 +86,18 @@ class CallkitSoundPlayerService : Service() {
         )
         var uri = sound?.let { getRingtoneUri(it) }
         if (uri == null) {
-            uri = RingtoneManager.getActualDefaultRingtoneUri(
-                this@CallkitSoundPlayerService,
-                RingtoneManager.TYPE_RINGTONE
-            )
+            uri = getDefaultRingtoneUriSafely()
         }
         try {
-            mediaPlayer(uri!!)
+            if (uri != null) {
+                mediaPlayer(uri)
+            }
         } catch (e: Exception) {
             try {
                 uri = getRingtoneUri("ringtone_default")
-                mediaPlayer(uri!!)
+                if (uri != null) {
+                    mediaPlayer(uri)
+                }
             } catch (e2: Exception) {
                 e2.printStackTrace()
             }
@@ -133,41 +134,45 @@ class CallkitSoundPlayerService : Service() {
         mediaPlayer?.setDataSource(applicationContext, uri)
     }
 
-    private fun getRingtoneUri(fileName: String) = try {
-        if (TextUtils.isEmpty(fileName)) {
+    private fun getDefaultRingtoneUriSafely(): Uri? {
+        return try {
             RingtoneManager.getActualDefaultRingtoneUri(
                 this@CallkitSoundPlayerService,
                 RingtoneManager.TYPE_RINGTONE
             )
+        } catch (e: SecurityException) {
+            // Fallback to default notification sound if WRITE_SETTINGS permission is not granted
+            try {
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            } catch (e2: Exception) {
+                // Last resort: return null to skip sound playback
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun getRingtoneUri(fileName: String) = try {
+        if (TextUtils.isEmpty(fileName)) {
+            getDefaultRingtoneUriSafely()
         }
         val resId = resources.getIdentifier(fileName, "raw", packageName)
         if (resId != 0) {
             Uri.parse("android.resource://${packageName}/$resId")
         } else {
             if (fileName.equals("system_ringtone_default", true)) {
-                RingtoneManager.getActualDefaultRingtoneUri(
-                    this@CallkitSoundPlayerService,
-                    RingtoneManager.TYPE_RINGTONE
-                )
+                getDefaultRingtoneUriSafely()
             } else {
-                RingtoneManager.getActualDefaultRingtoneUri(
-                    this@CallkitSoundPlayerService,
-                    RingtoneManager.TYPE_RINGTONE
-                )
+                getDefaultRingtoneUriSafely()
             }
         }
     } catch (e: Exception) {
         try {
             if (fileName.equals("system_ringtone_default", true)) {
-                RingtoneManager.getActualDefaultRingtoneUri(
-                    this@CallkitSoundPlayerService,
-                    RingtoneManager.TYPE_RINGTONE
-                )
+                getDefaultRingtoneUriSafely()
             } else {
-                RingtoneManager.getActualDefaultRingtoneUri(
-                    this@CallkitSoundPlayerService,
-                    RingtoneManager.TYPE_RINGTONE
-                )
+                getDefaultRingtoneUriSafely()
             }
         } catch (e: Exception) {
             null
