@@ -8,7 +8,7 @@ import android.os.Bundle
 class TransparentActivity : Activity() {
 
     companion object {
-        fun getIntent(context: Context, action: String, data: Bundle?): Intent {
+        fun getIntent(context: Context, action: String?, data: Bundle?): Intent {
             val intent = Intent(context, TransparentActivity::class.java)
             intent.action = action
             intent.putExtra("data", data)
@@ -30,16 +30,34 @@ class TransparentActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val data = intent.getBundleExtra("data")
+        try {
+            val data = intent.getBundleExtra("data")
+            val action = intent.action
 
-        val broadcastIntent = CallkitIncomingBroadcastReceiver.getIntent(this, intent.action!!, data)
-        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        sendBroadcast(broadcastIntent)
+            // Check if action is null
+            if (action.isNullOrEmpty()) {
+                android.util.Log.w("TransparentActivity", "Intent action is null or empty")
+                return
+            }
 
-        val activityIntent = AppUtils.getAppIntent(this, intent.action, data)
-        startActivity(activityIntent)
+            // Send broadcast intent
+            val broadcastIntent = CallkitIncomingBroadcastReceiver.getIntent(this, action, data)
+            broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+            sendBroadcast(broadcastIntent)
 
-        finish()
-        overridePendingTransition(0, 0)
+            // Get app intent - now with proper Android 11+ support
+            val activityIntent = AppUtils.getAppIntent(this, action, data)
+            if (activityIntent != null) {
+                startActivity(activityIntent)
+            } else {
+                android.util.Log.e("TransparentActivity", "Failed to create app intent for action: $action")
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("TransparentActivity", "Error in onCreate", e)
+        } finally {
+            finish()
+            overridePendingTransition(0, 0)
+        }
     }
 }
