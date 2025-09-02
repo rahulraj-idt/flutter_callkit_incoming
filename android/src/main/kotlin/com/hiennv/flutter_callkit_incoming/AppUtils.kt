@@ -37,7 +37,7 @@ object AppUtils {
             }
             
             intent?.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent?.putExtra(FlutterCallkitIncomingPlugin.EXTRA_CALLKIT_CALL_DATA, data)
+            intent?.putExtra("EXTRA_CALLKIT_CALL_DATA", data)
             intent?.action = action
             intent
         } catch (e: Exception) {
@@ -48,7 +48,7 @@ object AppUtils {
                     setPackage(context.packageName)
                     addCategory(Intent.CATEGORY_LAUNCHER)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                    putExtra(FlutterCallkitIncomingPlugin.EXTRA_CALLKIT_CALL_DATA, data)
+                    putExtra("EXTRA_CALLKIT_CALL_DATA", data)
                     this.action = action
                 }
             } catch (fallbackException: Exception) {
